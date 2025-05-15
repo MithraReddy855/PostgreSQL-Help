@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-5 mb-3">PostgreSQL Agent</h1>
+            <p class="lead text-secondary mb-4">A comprehensive tool for PostgreSQL documentation access, SQL query generation, and database error troubleshooting</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Documentation Feature -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 feature-card border-0 bg-dark bg-opacity-50">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon text-info">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h5 class="card-title">Documentation Search</h5>
+                    <p class="card-text text-secondary">Search and access PostgreSQL documentation to find answers to your questions.</p>
+                    <a href="/documentation" class="btn btn-outline-info stretched-link mt-2">Explore Docs</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Query Generator Feature -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 feature-card border-0 bg-dark bg-opacity-50">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon text-info">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h5 class="card-title">Query Generator</h5>
+                    <p class="card-text text-secondary">Generate SQL queries for table creation, data operations, and complex joins.</p>
+                    <a href="/query_generator" class="btn btn-outline-info stretched-link mt-2">Generate Queries</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Error Troubleshooter Feature -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 feature-card border-0 bg-dark bg-opacity-50">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon text-info">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <h5 class="card-title">Error Troubleshooter</h5>
+                    <p class="card-text text-secondary">Analyze and troubleshoot PostgreSQL errors with expert solutions.</p>
+                    <a href="/error_troubleshooter" class="btn btn-outline-info stretched-link mt-2">Fix Errors</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Schema Analyzer Feature -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 feature-card border-0 bg-dark bg-opacity-50">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon text-info">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <h5 class="card-title">Schema Analyzer</h5>
+                    <p class="card-text text-secondary">Understand and analyze your database schema for relevancy and optimization.</p>
+                    <a href="/schema_analyzer" class="btn btn-outline-info stretched-link mt-2">Analyze Schema</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Getting Started Section -->
+    <div class="row mt-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 bg-dark bg-opacity-50">
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-4 text-center">Getting Started</h3>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 text-info me-3">
+                                    <i class="fas fa-search fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5>Search Documentation</h5>
+                                    <p class="text-secondary">Start by exploring the PostgreSQL documentation to learn about features and best practices.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 text-info me-3">
+                                    <i class="fas fa-tools fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5>Generate Queries</h5>
+                                    <p class="text-secondary">Use the query generator to create complex SQL queries with proper syntax.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 text-info me-3">
+                                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5>Troubleshoot Errors</h5>
+                                    <p class="text-secondary">When you encounter database errors, use the troubleshooter to find solutions.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 text-info me-3">
+                                    <i class="fas fa-database fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5>Analyze Your Schema</h5>
+                                    <p class="text-secondary">Understand your database structure to optimize performance and spot potential issues.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

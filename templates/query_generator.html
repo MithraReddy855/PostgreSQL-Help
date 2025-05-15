@@ -1,0 +1,230 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-6 mb-3">SQL Query Generator</h1>
+            <p class="lead text-secondary">Generate SQL queries for table creation, data operations, and complex joins</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Query Generator Form -->
+            <div class="card border-0 bg-dark bg-opacity-50 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">Generate Query</h5>
+                    
+                    <form method="POST" action="{{ url_for('query_generator') }}">
+                        <div class="mb-3">
+                            <label for="query_type" class="form-label">Query Type</label>
+                            <select class="form-select" id="query_type" name="query_type" onchange="updateQueryForm(this.value)" required>
+                                <option value="select" {% if query_type == 'select' %}selected{% endif %}>SELECT - Retrieve Data</option>
+                                <option value="insert" {% if query_type == 'insert' %}selected{% endif %}>INSERT - Add Data</option>
+                                <option value="update" {% if query_type == 'update' %}selected{% endif %}>UPDATE - Modify Data</option>
+                                <option value="delete" {% if query_type == 'delete' %}selected{% endif %}>DELETE - Remove Data</option>
+                                <option value="create_table" {% if query_type == 'create_table' %}selected{% endif %}>CREATE TABLE - Define Schema</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="table_name" class="form-label">Table Name</label>
+                            <input type="text" class="form-control" id="table_name" name="table_name" placeholder="e.g., customers" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="columns" class="form-label" id="columnLabel">Columns</label>
+                            <textarea class="form-control" id="columns" name="columns" rows="3" placeholder="e.g., first_name, last_name, email"></textarea>
+                            <div class="form-text" id="columnHelp">Comma-separated list of columns (leave empty for * in SELECT queries)</div>
+                        </div>
+                        
+                        <div class="mb-3" id="conditionFields">
+                            <label for="conditions" class="form-label">WHERE Conditions</label>
+                            <textarea class="form-control" id="conditions" name="conditions" rows="2" placeholder="e.g., status = 'active' AND created_at > '2023-01-01'"></textarea>
+                            <div class="form-text">Conditions to filter rows (optional)</div>
+                        </div>
+                        
+                        <div class="mb-3" id="joinFields" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="join_table" class="form-label">Join Table</label>
+                                    <input type="text" class="form-control" id="join_table" name="join_table" placeholder="e.g., orders">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="join_condition" class="form-label">Join Condition</label>
+                                    <input type="text" class="form-control" id="join_condition" name="join_condition" placeholder="e.g., customers.id = orders.customer_id">
+                                </div>
+                            </div>
+                            <div class="form-text">Join conditions for combining tables (for SELECT queries)</div>
+                        </div>
+                        
+                        <div class="row" id="orderByFields" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label for="order_by" class="form-label">ORDER BY</label>
+                                <input type="text" class="form-control" id="order_by" name="order_by" placeholder="e.g., last_name ASC, created_at DESC">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="limit" class="form-label">LIMIT</label>
+                                <input type="text" class="form-control" id="limit" name="limit" placeholder="e.g., 10">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3" id="groupByFields" style="display: none;">
+                            <label for="group_by" class="form-label">GROUP BY</label>
+                            <input type="text" class="form-control" id="group_by" name="group_by" placeholder="e.g., department, status">
+                            <div class="form-text">Group results by columns (for aggregate queries)</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-code me-1"></i> Generate Query
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Generated Query Result -->
+            {% if generated_query %}
+            <div class="card border-0 bg-dark bg-opacity-50 mb-4">
+                <div class="card-header bg-info bg-opacity-25 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Generated Query</h5>
+                    <button class="btn btn-sm btn-outline-secondary copy-btn" data-content="{{ generated_query|e }}">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <div class="card-body">
+                    <pre class="sql-code mb-0">{{ generated_query }}</pre>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Query Templates -->
+            <div class="card border-0 bg-dark bg-opacity-50">
+                <div class="card-header border-0 bg-dark bg-opacity-50">
+                    <h5 class="mb-0">Query Templates & Examples</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-pills mb-3" id="query-templates-tab" role="tablist">
+                        {% for query_type, template in templates.items() %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if loop.first %}active{% endif %}" 
+                                    id="{{ query_type }}-tab" 
+                                    data-bs-toggle="pill" 
+                                    data-bs-target="#{{ query_type }}-template" 
+                                    type="button" 
+                                    role="tab" 
+                                    aria-controls="{{ query_type }}-template" 
+                                    aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
+                                {{ template.title }}
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <div class="tab-content mt-3" id="query-templates-content">
+                        {% for query_type, template in templates.items() %}
+                        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                             id="{{ query_type }}-template" 
+                             role="tabpanel" 
+                             aria-labelledby="{{ query_type }}-tab">
+                            
+                            <p>{{ template.explanation }}</p>
+                            
+                            <div class="position-relative mb-2">
+                                <button class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-2 copy-btn" 
+                                        data-content="{{ template.example|e }}">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre class="sql-code mb-0">{{ template.example }}</pre>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- JOIN Examples Section -->
+                    <div class="mt-4">
+                        <h5 class="mb-3">JOIN Examples</h5>
+                        <div class="accordion" id="joinExamplesAccordion">
+                            <div class="accordion-item bg-dark bg-opacity-50 border-0">
+                                <h2 class="accordion-header" id="innerJoinHeading">
+                                    <button class="accordion-button bg-dark bg-opacity-50 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#innerJoinExample" aria-expanded="false" aria-controls="innerJoinExample">
+                                        INNER JOIN
+                                    </button>
+                                </h2>
+                                <div id="innerJoinExample" class="accordion-collapse collapse" aria-labelledby="innerJoinHeading" data-bs-parent="#joinExamplesAccordion">
+                                    <div class="accordion-body">
+                                        <p>Returns only the rows where there is a match in both tables.</p>
+                                        <pre class="sql-code">SELECT o.order_id, c.customer_name
+FROM orders o
+INNER JOIN customers c ON o.customer_id = c.id</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item bg-dark bg-opacity-50 border-0">
+                                <h2 class="accordion-header" id="leftJoinHeading">
+                                    <button class="accordion-button bg-dark bg-opacity-50 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#leftJoinExample" aria-expanded="false" aria-controls="leftJoinExample">
+                                        LEFT JOIN
+                                    </button>
+                                </h2>
+                                <div id="leftJoinExample" class="accordion-collapse collapse" aria-labelledby="leftJoinHeading" data-bs-parent="#joinExamplesAccordion">
+                                    <div class="accordion-body">
+                                        <p>Returns all rows from the left table and matching rows from the right table. If no match, NULL values are returned for right table columns.</p>
+                                        <pre class="sql-code">SELECT c.customer_name, o.order_id
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item bg-dark bg-opacity-50 border-0">
+                                <h2 class="accordion-header" id="rightJoinHeading">
+                                    <button class="accordion-button bg-dark bg-opacity-50 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#rightJoinExample" aria-expanded="false" aria-controls="rightJoinExample">
+                                        RIGHT JOIN
+                                    </button>
+                                </h2>
+                                <div id="rightJoinExample" class="accordion-collapse collapse" aria-labelledby="rightJoinHeading" data-bs-parent="#joinExamplesAccordion">
+                                    <div class="accordion-body">
+                                        <p>Returns all rows from the right table and matching rows from the left table. If no match, NULL values are returned for left table columns.</p>
+                                        <pre class="sql-code">SELECT c.customer_name, o.order_id
+FROM orders o
+RIGHT JOIN customers c ON o.customer_id = c.id</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item bg-dark bg-opacity-50 border-0">
+                                <h2 class="accordion-header" id="fullJoinHeading">
+                                    <button class="accordion-button bg-dark bg-opacity-50 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fullJoinExample" aria-expanded="false" aria-controls="fullJoinExample">
+                                        FULL OUTER JOIN
+                                    </button>
+                                </h2>
+                                <div id="fullJoinExample" class="accordion-collapse collapse" aria-labelledby="fullJoinHeading" data-bs-parent="#joinExamplesAccordion">
+                                    <div class="accordion-body">
+                                        <p>Returns all rows when there is a match in either the left or right table. If no match, NULL values are returned for columns from the table without a match.</p>
+                                        <pre class="sql-code">SELECT c.customer_name, o.order_id
+FROM customers c
+FULL OUTER JOIN orders o ON c.id = o.customer_id</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize form with the correct fields visible
+    const queryType = document.getElementById('query_type').value;
+    updateQueryForm(queryType);
+});
+</script>
+{% endblock %}

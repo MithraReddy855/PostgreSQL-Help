@@ -1,0 +1,245 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <h1 class="display-6 mb-3">PostgreSQL Schema Analyzer</h1>
+            <p class="lead text-secondary">Analyze and understand your database schema for relevancy and optimization</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Schema Analysis Form -->
+            <div class="card border-0 bg-dark bg-opacity-50 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">Analyze Schema</h5>
+                    
+                    <form method="POST" action="{{ url_for('schema_analyzer') }}">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="connection_string" class="form-label">Database Connection</label>
+                                <input type="text" class="form-control" id="connection_string" name="connection_string" 
+                                       placeholder="host:port/database or full connection URL" 
+                                       value="{{ connection_string }}" required>
+                                <div class="form-text">
+                                    Format: hostname:port/database (e.g., localhost:5432/postgres) or a full PostgreSQL connection URL
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="table_name" class="form-label">Table Name</label>
+                                <input type="text" class="form-control" id="table_name" name="table_name" 
+                                       placeholder="e.g., users, schema.table" required>
+                                <div class="form-text">
+                                    Optionally include schema (e.g., public.users)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-sitemap me-1"></i> Analyze Table Structure
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Schema Analysis Results -->
+            {% if schema_analysis %}
+                {% if schema_analysis.error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i> {{ schema_analysis.error }}
+                    </div>
+                {% else %}
+                    <div class="card border-0 bg-dark bg-opacity-50 mb-4">
+                        <div class="card-header bg-info bg-opacity-25 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Schema Analysis: {{ schema_analysis.table_name }}</h5>
+                            <span class="badge bg-info">{{ schema_analysis.columns|length }} Columns</span>
+                        </div>
+                        <div class="card-body">
+                            <h6>Table Structure</h6>
+                            <div class="table-container mb-4">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Column</th>
+                                            <th>Type</th>
+                                            <th>Nullable</th>
+                                            <th>Default</th>
+                                            <th>PK</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for column in schema_analysis.columns %}
+                                            <tr>
+                                                <td>{{ column.name }}</td>
+                                                <td><code>{{ column.type }}</code></td>
+                                                <td>{{ 'Yes' if column.nullable else 'No' }}</td>
+                                                <td>{{ column.default if column.default != 'None' else '-' }}</td>
+                                                <td>{{ '✓' if column.is_primary or (schema_analysis.primary_key and column.name in schema_analysis.primary_key) else '' }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            {% if schema_analysis.primary_key %}
+                                <h6>Primary Key</h6>
+                                <p class="bg-dark bg-opacity-50 p-2 rounded">
+                                    <code>{{ schema_analysis.primary_key|join(', ') }}</code>
+                                </p>
+                            {% endif %}
+                            
+                            {% if schema_analysis.foreign_keys %}
+                                <h6>Foreign Keys</h6>
+                                <div class="table-container mb-4">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Columns</th>
+                                                <th>References</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for fk in schema_analysis.foreign_keys %}
+                                                <tr>
+                                                    <td><code>{{ fk.name }}</code></td>
+                                                    <td><code>{{ fk.columns|join(', ') }}</code></td>
+                                                    <td><code>{{ fk.referred_table }}({{ fk.referred_columns|join(', ') }})</code></td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+                            
+                            {% if schema_analysis.indexes %}
+                                <h6>Indexes</h6>
+                                <div class="table-container mb-4">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Columns</th>
+                                                <th>Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for idx in schema_analysis.indexes %}
+                                                <tr>
+                                                    <td><code>{{ idx.name }}</code></td>
+                                                    <td><code>{{ idx.columns|join(', ') }}</code></td>
+                                                    <td>{{ 'UNIQUE' if idx.unique else 'INDEX' }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+                            
+                            {% if schema_analysis.create_table_sql %}
+                                <h6>CREATE TABLE SQL</h6>
+                                <div class="position-relative mb-4">
+                                    <button class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-2 copy-btn" 
+                                            data-content="{{ schema_analysis.create_table_sql|e }}">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <pre class="sql-code mb-0">{{ schema_analysis.create_table_sql }}</pre>
+                                </div>
+                            {% endif %}
+                            
+                            {% if schema_analysis.sample_data_structure %}
+                                <h6>Sample Data Structure</h6>
+                                <div class="position-relative">
+                                    <pre class="bg-dark text-light p-3 rounded mb-0">{{ schema_analysis.sample_data_structure }}</pre>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+            
+            <!-- Schema Analysis Tips -->
+            <div class="card border-0 bg-dark bg-opacity-50">
+                <div class="card-header border-0 bg-dark bg-opacity-50">
+                    <h5 class="mb-0">Schema Design Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-dark bg-opacity-25">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">Normalization</h6>
+                                    <ul class="mb-0">
+                                        <li>Use appropriate normalization forms (1NF, 2NF, 3NF)</li>
+                                        <li>Eliminate data redundancy to reduce update anomalies</li>
+                                        <li>Consider denormalization selectively for performance</li>
+                                        <li>Use foreign keys to maintain data integrity</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-dark bg-opacity-25">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">Indexing Strategy</h6>
+                                    <ul class="mb-0">
+                                        <li>Index columns used in WHERE clauses and JOINs</li>
+                                        <li>Use composite indexes for multi-column conditions</li>
+                                        <li>Consider partial indexes for filtered queries</li>
+                                        <li>Avoid over-indexing to maintain write performance</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-dark bg-opacity-25">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">Data Types</h6>
+                                    <ul class="mb-0">
+                                        <li>Use appropriate types (int vs bigint, text vs varchar)</li>
+                                        <li>Consider JSON/JSONB for semi-structured data</li>
+                                        <li>Use ENUM types for constrained string values</li>
+                                        <li>Choose UUID vs serial/bigserial based on requirements</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-dark bg-opacity-25">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">Constraints</h6>
+                                    <ul class="mb-0">
+                                        <li>Use NOT NULL for required columns</li>
+                                        <li>Implement CHECK constraints for data validation</li>
+                                        <li>Add UNIQUE constraints for uniqueness requirements</li>
+                                        <li>Define appropriate ON DELETE/UPDATE actions for FKs</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set focus on connection string input if empty
+    const connectionInput = document.getElementById('connection_string');
+    if (connectionInput && connectionInput.value.trim() === '') {
+        connectionInput.focus();
+    }
+});
+</script>
+{% endblock %}

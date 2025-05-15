@@ -1,0 +1,191 @@
+/* PostgreSQL Agent Custom Styles */
+
+/* Main layout */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+.sidebar {
+  width: 250px;
+  transition: all 0.3s;
+}
+
+.sidebar-collapsed .sidebar {
+  margin-left: -250px;
+}
+
+.sidebar-collapsed .main-content {
+  margin-left: 0;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    margin-left: -250px;
+  }
+  
+  .sidebar.active {
+    margin-left: 0;
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+/* CodeMirror customizations */
+.CodeMirror {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.25rem;
+  height: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9rem;
+}
+
+/* Make sure CodeMirror fits the container */
+.CodeMirror-scroll {
+  min-height: 100px;
+}
+
+/* Card styling */
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  font-weight: 500;
+}
+
+/* Feature cards on homepage */
+.feature-card {
+  height: 100%;
+  transition: transform 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Documentation styling */
+.doc-section {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.25rem;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.doc-section h5 {
+  margin-bottom: 0.75rem;
+}
+
+/* Error analysis styling */
+.solution-steps {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  border-radius: 0.25rem;
+}
+
+/* Schema analyzer styling */
+.table-sm {
+  font-size: 0.9rem;
+}
+
+/* Form fields */
+.form-label {
+  font-weight: 500;
+}
+
+.form-text {
+  font-size: 0.8rem;
+}
+
+/* Help text and tooltips */
+.help-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+/* Query templates */
+.query-template {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.query-template:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Copy button */
+.copy-btn {
+  z-index: 100;
+}
+
+/* Loading spinner */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Footer */
+.footer {
+  padding: 1rem 0;
+  font-size: 0.85rem;
+}
+
+/* Syntax highlighting for pre blocks */
+pre:not(.CodeMirror-line) {
+  padding: 1rem;
+  border-radius: 0.25rem;
+  background-color: #2b2b2b;
+  color: #f8f8f2;
+  overflow: auto;
+  max-height: 400px;
+}
+
+/* Documentation search results */
+.search-result {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.25rem;
+  border-left: 4px solid var(--bs-primary);
+}
+
+.search-result-title {
+  margin-bottom: 0.5rem;
+}
+
+.search-result-url {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.5rem;
+}
+
+/* Tables */
+.table-container {
+  overflow-x: auto;
+}
+
+.bg-custom-dark {
+  background-color: rgba(0, 0, 0, 0.2);
+}

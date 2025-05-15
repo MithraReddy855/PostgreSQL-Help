@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-6 mb-3">PostgreSQL Error Troubleshooter</h1>
+            <p class="lead text-secondary">Analyze and resolve database errors with expert solutions</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Error Analysis Form -->
+            <div class="card border-0 bg-dark bg-opacity-50 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">Analyze Error</h5>
+                    
+                    <form method="POST" action="{{ url_for('error_troubleshooter') }}">
+                        <div class="mb-3">
+                            <label for="error_text" class="form-label">PostgreSQL Error Message</label>
+                            <textarea class="form-control" id="error_text" name="error_text" rows="6" placeholder="Paste your PostgreSQL error message here..." required>{{ error_text }}</textarea>
+                            <div class="form-text">Paste the complete error message including any error codes or details</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="errorExamplesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-lightbulb me-1"></i> Load Example
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="errorExamplesDropdown">
+                                    <li><a class="dropdown-item" href="#" onclick="loadErrorExample('connection_refused'); return false;">Connection Refused</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="loadErrorExample('authentication_failed'); return false;">Authentication Failed</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="loadErrorExample('permission_denied'); return false;">Permission Denied</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="loadErrorExample('relation_not_found'); return false;">Relation Not Found</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="loadErrorExample('syntax_error'); return false;">Syntax Error</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="loadErrorExample('duplicate_key'); return false;">Duplicate Key</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="loadErrorExample('foreign_key_violation'); return false;">Foreign Key Violation</a></li>
+                                </ul>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-search me-1"></i> Analyze Error
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Error Analysis Results -->
+            {% if error_analysis %}
+                <div class="card border-0 bg-dark bg-opacity-50 mb-4">
+                    <div class="card-header bg-info bg-opacity-25">
+                        <h5 class="mb-0">Error Analysis: {{ error_analysis.error_type }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-3 text-muted">Explanation:</h6>
+                        <p class="card-text">{{ error_analysis.explanation }}</p>
+                        
+                        <h6 class="card-subtitle mb-3 text-muted mt-4">Recommended Solution:</h6>
+                        <div class="solution-steps bg-dark bg-opacity-50 p-3 rounded">
+                            {% if error_analysis.solution %}
+                                {% set solution_steps = error_analysis.solution.split('\n') %}
+                                {% if solution_steps[0].startswith('1.') %}
+                                    <ol class="mb-0">
+                                        {% for step in solution_steps %}
+                                            {% if step.strip() %}
+                                                <li>{{ step[2:] if step[:2].startswith(loop.index|string + '.') else step }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ol>
+                                {% else %}
+                                    {% for paragraph in solution_steps %}
+                                        {% if paragraph.strip() %}
+                                            <p {% if not loop.last %}class="mb-2"{% else %}class="mb-0"{% endif %}>{{ paragraph }}</p>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% else %}
+                                <p class="mb-0">No specific solution available for this error.</p>
+                            {% endif %}
+                        </div>
+                        
+                        {% if error_analysis.error_code %}
+                            <div class="mt-3 text-muted">
+                                <small>Error Code: {{ error_analysis.error_code }}</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Common PostgreSQL Errors -->
+            <div class="card border-0 bg-dark bg-opacity-50">
+                <div class="card-header border-0 bg-dark bg-opacity-50">
+                    <h5 class="mb-0">Common PostgreSQL Errors</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="commonErrorsAccordion">
+                        {% for error in common_errors %}
+                            <div class="accordion-item bg-dark bg-opacity-50 border-0 mb-2">
+                                <h2 class="accordion-header" id="heading{{ loop.index }}">
+                                    <button class="accordion-button bg-dark bg-opacity-50 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
+                                        {{ error.title }}
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#commonErrorsAccordion">
+                                    <div class="accordion-body">
+                                        <p class="mb-2"><strong>Description:</strong> {{ error.description }}</p>
+                                        <p class="mb-0"><strong>Solution:</strong> {{ error.solution }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set focus on error textarea if empty
+    const errorTextarea = document.getElementById('error_text');
+    if (errorTextarea && errorTextarea.value.trim() === '') {
+        errorTextarea.focus();
+    }
+});
+</script>
+{% endblock %}

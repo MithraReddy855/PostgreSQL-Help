@@ -1,0 +1,177 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-6 mb-3">PostgreSQL Documentation</h1>
+            <p class="lead text-secondary">Search and access PostgreSQL documentation to find answers to your questions</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Documentation Search Form -->
+        <div class="col-lg-8 mx-auto mb-4">
+            <div class="card border-0 bg-dark bg-opacity-50">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">Search Documentation</h5>
+                    
+                    <form method="POST" action="{{ url_for('documentation') }}">
+                        <div class="input-group mb-3">
+                            <input type="text" name="search_term" class="form-control" 
+                                   placeholder="Search for PostgreSQL topics, functions, commands..." 
+                                   value="{{ search_term }}" required>
+                            <button class="btn btn-info" type="submit">
+                                <i class="fas fa-search me-1"></i> Search
+                            </button>
+                        </div>
+                        <div class="form-text text-secondary">
+                            Example searches: "create table", "data types", "indexing", "join syntax", "error codes"
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Documentation Sections -->
+        <div class="col-lg-8 mx-auto mb-4">
+            <div class="card border-0 bg-dark bg-opacity-50">
+                <div class="card-header border-0 bg-dark bg-opacity-50">
+                    <h5 class="mb-0">Documentation Sections</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% if doc_sections %}
+                            {% for section_name, section_links in doc_sections.items() %}
+                                <div class="col-md-6">
+                                    <div class="doc-section">
+                                        <h5 class="text-info">{{ section_name|capitalize }}</h5>
+                                        <ul class="list-unstyled mb-0">
+                                            {% for link in section_links[:5] %}
+                                                <li class="mb-1">
+                                                    <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                                                        <i class="fas fa-external-link-alt me-1 small"></i> {{ link.title }}
+                                                    </a>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-info-circle me-2"></i> Documentation sections are being loaded...
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Results -->
+        {% if search_results %}
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 bg-dark bg-opacity-50">
+                    <div class="card-header border-0 bg-dark bg-opacity-50 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Search Results for "{{ search_term }}"</h5>
+                        <span class="badge bg-info">{{ search_results|length }} results</span>
+                    </div>
+                    <div class="card-body">
+                        {% for result in search_results %}
+                            <div class="search-result bg-dark bg-opacity-25 mb-3">
+                                <h5 class="search-result-title">
+                                    <a href="{{ result.url }}" target="_blank" rel="noopener noreferrer" class="text-info text-decoration-none">
+                                        {{ result.title }}
+                                    </a>
+                                </h5>
+                                <div class="search-result-url">
+                                    <a href="{{ result.url }}" target="_blank" rel="noopener noreferrer" class="text-secondary text-decoration-none">
+                                        <i class="fas fa-link me-1"></i> {{ result.url }}
+                                    </a>
+                                </div>
+                                <p class="mb-0">{{ result.snippet }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% elif search_term %}
+            <div class="col-lg-8 mx-auto">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i> No results found for "{{ search_term }}". Please try a different search term.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Common PostgreSQL Topics -->
+    <div class="row mt-4">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 bg-dark bg-opacity-50">
+                <div class="card-header border-0 bg-dark bg-opacity-50">
+                    <h5 class="mb-0">Common PostgreSQL Topics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 bg-dark bg-opacity-25">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">Data Types</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><a href="https://www.postgresql.org/docs/current/datatype.html" target="_blank" class="text-decoration-none">Overview</a></li>
+                                        <li><a href="https://www.postgresql.org/docs/current/datatype-numeric.html" target="_blank" class="text-decoration-none">Numeric Types</a></li>
+                                        <li><a href="https://www.postgresql.org/docs/current/datatype-character.html" target="_blank" class="text-decoration-none">Character Types</a></li>
+                                        <li><a href="https://www.postgresql.org/docs/current/datatype-datetime.html" target="_blank" class="text-decoration-none">Date/Time Types</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 bg-dark bg-opacity-25">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">SQL Commands</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><a href="https://www.postgresql.org/docs/current/sql-select.html" target="_blank" class="text-decoration-none">SELECT</a></li>
+                                        <li><a href="https://www.postgresql.org/docs/current/sql-insert.html" target="_blank" class="text-decoration-none">INSERT</a></li>
+                                        <li><a href="https://www.postgresql.org/docs/current/sql-update.html" target="_blank" class="text-decoration-none">UPDATE</a></li>
+                                        <li><a href="https://www.postgresql.org/docs/current/sql-delete.html" target="_blank" class="text-decoration-none">DELETE</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 bg-dark bg-opacity-25">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">Administration</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><a href="https://www.postgresql.org/docs/current/app-psql.html" target="_blank" class="text-decoration-none">psql</a></li>
+                                        <li><a href="https://www.postgresql.org/docs/current/backup.html" target="_blank" class="text-decoration-none">Backup & Restore</a></li>
+                                        <li><a href="https://www.postgresql.org/docs/current/monitoring.html" target="_blank" class="text-decoration-none">Monitoring</a></li>
+                                        <li><a href="https://www.postgresql.org/docs/current/performance-tips.html" target="_blank" class="text-decoration-none">Performance Tips</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set focus on search input
+    const searchInput = document.querySelector('input[name="search_term"]');
+    if (searchInput) {
+        searchInput.focus();
+    }
+});
+</script>
+{% endblock %}
