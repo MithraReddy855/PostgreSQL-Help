@@ -191,7 +191,7 @@ Star the repo ⭐ if it helped you — it motivates more updates!
 
 Mithra Reddy  
 [GitHub](https://github.com/MithraReddy855)  
-Email: your.email@example.com *(replace with your real one)*  
+Email: raghumithrareddy@gmail.com  
 
 Project Link: [https://github.com/MithraReddy855/PostgreSQL-Help](https://github.com/MithraReddy855/PostgreSQL-Help)
 
