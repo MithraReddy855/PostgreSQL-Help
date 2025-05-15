@@ -199,8 +199,7 @@ Project Link: [https://github.com/MithraReddy855/PostgreSQL-Help](https://github
 
 ## 🙏 Acknowledgments
 
-- [ShaanCoding ReadME Generator](https://github.com/ShaanCoding/ReadME-Generator)
-- [Best-README-Template by othneildrew](https://github.com/othneildrew/Best-README-Template)
+
 - [Flask Docs](https://flask.palletsprojects.com/)
 - [PostgreSQL Docs](https://www.postgresql.org/docs/)
 - [BeautifulSoup Docs](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
